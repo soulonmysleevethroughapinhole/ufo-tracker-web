@@ -20,7 +20,7 @@ Vue.use(VueRouter)
 	component: WorldMap
   },
   {
-	path: '/pins',
+	path: '/pins/:username',
 	name: 'Pins',
 	component: Pins
   },
