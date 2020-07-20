@@ -1,15 +1,25 @@
 <template>
 	<div>
-		Video<br />
-		<video id="video1" width="160" height="120" autoplay></video> <br />
+		<h1>
+			{{ name }}
+		</h1>
 
-		{{ name }}
-		{{ description }}
 
-		{{ getIsPlayerLive }}
+		<div id="videowrapper">
+			<video id="video1" autoplay width="100%" controls></video> <br />
+		</div>
+		
+		<h2>
+			{{ description }}
+		</h2>
+
+		<div>
+			<!-- CHAT -->
+		</div>
 
 		<div>
 			<div id='logs'>
+				Logs
 				{{ logBroadcast }}
 			</div>
 		</div>
@@ -48,72 +58,6 @@ export default {
 		}
 	},
 	methods: {
-		Connect() {
-			//reconnectTimeOut = null
-			if (this.webSocketReady() || this.ReconnectDelay === -1) {
-				return
-			}
-
-			this.userPing = -1 // only for data	//userListStatus	//updateStatus() // fuck that, only add later
-			
-			this.socket = new WebSocket("ws://localhost:8005/api/" + this.$route.params.username )
-			this.socket.onerror = function (e) {
-				console.log(e)
-			}
-			this.socket.onopen = (e) => {
-				this.w(this.MessageNick, "username") //topic of stream
-
-				this.pingServer()
-			}
-			//onmessage is for receiving socket messages
-			this.socket.onmessage = (e) => {
-				try {
-					if (typeof e.data === "string") {
-						const p = JSON.parse(e.data) //parse? I think
-						if (p.M !== undefined) {
-							p.M = atob(p.M)
-						}
-
-						console.log("Read ", p)
-
-						if (p.T == this.MessagePong) {
-							if (parseInt(p.M, 10) == this.lastPing) {
-								this.userPing = Date.now() - this.lastPing
-							}
-						} else if (p.T == 120) {
-							if (p.N === undefined) {
-								return
-							}
-							//this.LogChannel(p.C, "&lt;" + escapeEntities(p.N) + "&gt; " + p.M);
-							//nick will be generated from the token ea request
-							this.LogChannel(p.C, "&lt;" + p.N + "&gt; " + p.M);
-							//append to chat corpus
-						}
-						//alright what else
-					}
-				} 
-				catch (e) {
-					console.log(e)
-				}
-				finally {
-					console.log("New message received")
-				}
-			}
-
-			this.socket.onclose = function(e) {
-				console.log("Disconnected")
-			}
-		},
-		sendMessage() {
-			if (this.message != "") {
-				this.writeSocket({
-						T: this.MessageChat, 
-						//C: this.$route.params.username,
-						C: 1,
-						M: btoa(this.message)})
-				this.message = ""
-			}
-		},
 		checkIfStreamLive() {
 			axios({
 				url: "http://localhost:8000/api/streams/" + this.$route.params.username,
@@ -124,7 +68,7 @@ export default {
 				this.isStreamCreated = true
 				this.name = res.data.name
 				this.description = res.data.description
-				this.Connect()
+				//this.Connect()
 
 				if (res.data.NumOfPeers > 0) {
 					this.isStreamLive = true
@@ -146,19 +90,16 @@ export default {
 			pc.oniceconnectionstatechange = e => this.logBroadcast += pc.iceConnectionState + '\n'
 			pc.onicecandidate = event => {
 				if (event.candidate === null) {
-					//this.browsersdp = btoa(JSON.stringify(pc.localDescription))
-
 					axios({
 						url: `http://localhost:8000/api/sdp/` + this.$route.params.username,
 						data: btoa(JSON.stringify(pc.localDescription)),
 						method: "POST"
 					}).then(
 						res => {
-							console.log(res.data)
+							console.log(JSON.parse(atob(res.data)))
 							if (res.data === '') {
 								return alert('Session Description must not be empty')
 							}
-
 							try {
 								pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(atob(res.data))))
 							} catch (e) {
@@ -170,17 +111,21 @@ export default {
 					)
 				}
 			}
-			pc.addTransceiver('audio')
+			//pc.addTransceiver('audio') omggg mom i am going to commit suicide
+		    pc.addTransceiver('video')
 			pc.createOffer()
 				.then(d => { 
 					pc.setLocalDescription(d)
 				})
 				.catch(e => this.logBroadcast += e + '\n')
 			pc.ontrack = (event) => {
-				var el = document.getElementById('video1')
-				el.srcObject = event.streams[0]
-				el.autoplay = true
-				el.controls = true
+				// var el = document.getElementById('video1')
+				// el.srcObject = event.streams[0]
+				console.log("ontrack")
+				console.log(event.streams[0])
+
+				pc.addStream(document.getElementById('video1').srcObject = event.streams[0])
+
 			}
 		},
 		w(t, m) {
@@ -230,13 +175,20 @@ export default {
 			// $('.buffer').scrollTop($('.buffer').prop("scrollHeight"))
 		}
 	},
-	computed: {
-		getIsPlayerLive() {
-			return this.$store.getters['liveset/getIsPlayerLive']
-		}
-	},
 	created: function() {
 		this.checkIfStreamLive()
 	}
 }
 </script>
+
+
+<style scoped>
+#videowrapper {
+	box-shadow: 0px 0px 10px 5px #aaaaaa;
+	background-color:#333333;
+	width:85%;
+	padding:0.1em;
+	margin: 0em auto;
+	border-radius: 5px;
+}
+</style>

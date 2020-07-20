@@ -5,6 +5,7 @@ import WorldMap from '../views/WorldMap.vue'
 import Pins from '../views/Pins.vue'
 import Sightings from '../views/Sightings.vue'
 import Friends from '../views/Friends.vue'
+import Stream from '../views/Stream.vue'
 
 Vue.use(VueRouter)
 
@@ -20,9 +21,14 @@ Vue.use(VueRouter)
 	component: WorldMap
   },
   {
-	path: '/pins/:username',
+	path: '/pins/:username?',
 	name: 'Pins',
 	component: Pins
+  },
+  {
+	path: '/stream/:username',
+	name: 'Stream',
+	component: Stream
   },
   {
 	path: '/sightings',
