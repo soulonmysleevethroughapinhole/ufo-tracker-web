@@ -1,7 +1,7 @@
 <template>
 	<div id='Sightings'>
 		<div id='SightingsPosts'>
-				<NewPost />
+			<NewPost />
 			<div v-for='(sight,i) in getSightings' :key='i' >
 				<SightingDocument v-bind:sight='sight' />
 			</div>
@@ -72,6 +72,7 @@ export default class Sightings extends Vue {
 
 	border-radius:15px;
 	border:1px solid #222;
+	background: linear-gradient(145deg, var(--themed-background-color-secondary), var(--themed-background-color));
 
 	height: calc(100vh - 84px);
 	overflow:scroll;

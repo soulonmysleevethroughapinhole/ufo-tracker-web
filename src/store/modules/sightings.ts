@@ -38,6 +38,9 @@ export default class Sightings extends VuexModule {
 
     @Action
     private POST_SIGHTING(title: string, corpus: string): void {    
+        console.log("LOGGING TITLE AND CORPUS")
+        console.log(title)
+        console.log(corpus)
         axios({
 			url: "http://localhost:8000/api/posts",
             method: "POST",

@@ -46,7 +46,8 @@
 @media (prefers-color-scheme: dark) {
 	:root {
 		--themed-background-color: #121212;
-		--themed-background-color-secondary: #222;
+		--themed-background-color-secondary: #101010;
+		--themed-background-color-tertiary: #222222;
 		--themed-foreground-color: #00ff00;
 	}
 }
@@ -54,6 +55,7 @@
 body {
 	margin:0;
 	background-color:#121212;
+	background: linear-gradient(145deg, var(--themed-background-color-secondary), var(--themed-background-color));
 }
 
 ::-webkit-scrollbar {
